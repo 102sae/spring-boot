@@ -3,70 +3,94 @@ package com.example.springbootlecture.service;
 import com.example.springbootlecture.domain.entity.Movie;
 import com.example.springbootlecture.domain.request.MovieRequest;
 import com.example.springbootlecture.domain.response.MovieResponse;
+import com.example.springbootlecture.repository.LogRepository;
+import com.example.springbootlecture.repository.MovieRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MovieService {
+    private final MovieRepository movieRepository;
+    private final LogService logService;
+    private LogRepository logRepository;
 
-    private static List<Movie> movies = new ArrayList<>();
-    //생성하기 전에 호출한다. Movie Service가 생성하면서 메소드가 호출.
-    @PostConstruct
-        public void init() {
-        movies.addAll(List.of(
-                new Movie(1, "라라랜드", 2017, LocalDateTime.now()),
-                new Movie(2, "올드보이", 2005, LocalDateTime.now()),
-                new Movie(3, "에브리씽 에브리웨어 올댓원스", 2022,  LocalDateTime.now())
-        ));
-    }
 
-    public List<MovieResponse> getMovies() {
-        return movies.stream().map(MovieResponse::of).toList();
-//        return movies.stream().map(movie ->
-//                MovieResponse.builder()
-//                        .id(movie.getId())
-//                        .name(movie.getName())
-//                        .productionYear(movie.getProductionYear())
-//                        .build()
-//          );
-    }
 
-    public Movie getMovie(long movieId) {
-        return movies.stream()
-                .filter(movie -> movie.getId() == movieId)
-                .toList()
-                .stream()
-                .findFirst()
+    //private final EntityManagerFactory emf;
+@Transactional
+    public MovieResponse getMovie(long movieId) {
+        Movie movie = movieRepository.findById(movieId)
                 .orElseThrow();
+
+        return MovieResponse.of(movie);
+    /*
+        EntityManager entityManager = emf.createEntityManager();
+        Movie movie = entityManager.find(Movie.class,movieId);
+
+        return MovieResponse.of(movie);*/
     }
 
-    public void createMovie(MovieRequest movieRequset) {
-        Movie movie = new Movie(
-            movies.size()+1,
-                movieRequset.getName(),
-                movieRequset.getProductionYear(),
-                LocalDateTime.now()
-
-        );
-        movies.add(movie);
+    public List<MovieResponse> getMovies()
+    {
+        List<Movie> movies = movieRepository.findByProductionYear(2008);
+        return movies.stream().map(MovieResponse::of).toList();
     }
+
+    @Transactional
+    public void saveMovie(MovieRequest movieRequest) {
+        Movie movie1 = new Movie(movieRequest.getName()+"1",movieRequest.getProductionYear());
+        movieRepository.save(movie1);
+        logService.saveLog();
+
+        //throw new RuntimeException("강제 에러");
+
+
+
+
+        /*
+        처음 코드
+        EntityManager entityManager = emf.createEntityManager();
+        EntityTransaction tx = entityManager.getTransaction();
+
+        try{
+            tx.begin();
+
+            Movie movie = new Movie(movieRequset.getName(),movieRequset.getProductionYear(), movieRequset.getDirectorId());
+           *//*
+           rollback 확인 용
+           if(movie != null)
+            {
+                throw new RuntimeException("강제 오류 처리 ");
+            }*//*
+            entityManager.persist(movie);
+            entityManager.flush();
+            tx.commit();
+        }
+        catch (Exception e){
+            tx.rollback();
+        }*/
+    }
+
+    @Transactional
     public void updateMovie(long movieId , MovieRequest movieRequest) {
-        Movie movie = getMovie(movieId);
-        movie.setName(movieRequest.getName());
-        movie.setProductionYear(movieRequest.getProductionYear());
+        Movie movie = movieRepository.findById(movieId).orElseThrow();
 
+        movie.setName("변경");
+        movie.setName("변경");
+        movie.setName("변경");
+        //동일한 변경에 대해서는 바로 변경하지 않고 마지막 update 쿼리만 반영함. -> 쓰기 지연
     }
 
 
+    @Transactional
     public void deleteMovie(long movieId) {
-        Movie movie = getMovie(movieId);
-        movies.remove(movie);
+        Movie movie = movieRepository.findById(movieId).orElseThrow();
+        movieRepository.delete(movie);
     }
-
 
 
 }

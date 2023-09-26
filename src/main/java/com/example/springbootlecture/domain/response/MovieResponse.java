@@ -1,10 +1,10 @@
 package com.example.springbootlecture.domain.response;
 
+import com.example.springbootlecture.domain.entity.Actor;
 import com.example.springbootlecture.domain.entity.Movie;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Builder
@@ -15,8 +15,16 @@ public class MovieResponse {
 
     private final String name;
     private final Integer productionYear;
+    private final String directorName;
+    private final List<String> actorName;
+    public static MovieResponse of(Movie entity){
+        return new MovieResponse(
+                entity.getId(),
+                entity.getName(),
+                entity.getProductionYear(),
+                entity.getDirector().getName(),
+                entity.getActors().stream().map(Actor::getName).toList()
 
-    public static MovieResponse of(Movie movie){
-        return new MovieResponse(movie.getId(), movie.getName(), movie.getProductionYear());
+        );
     }
 }
