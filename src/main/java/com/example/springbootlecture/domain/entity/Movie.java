@@ -18,7 +18,7 @@ import java.util.List;
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "name")
     private String name;
@@ -50,8 +50,19 @@ public class Movie {
 
     }
 
+    public Movie(String name, Integer productionYear,  {
+    }
+
     public void setName(String name)
     {
         this.name = name;
+    }
+
+    public void setActors(List<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public void setDirector(Director director) {
+        this.director = director;
     }
 }

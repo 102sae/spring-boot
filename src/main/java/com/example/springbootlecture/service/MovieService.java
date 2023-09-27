@@ -21,10 +21,11 @@ public class MovieService {
 
 
     //private final EntityManagerFactory emf;
-@Transactional
+    @Transactional
     public MovieResponse getMovie(long movieId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow();
+
 
         return MovieResponse.of(movie);
     /*
@@ -42,8 +43,8 @@ public class MovieService {
 
     @Transactional
     public void saveMovie(MovieRequest movieRequest) {
-        Movie movie1 = new Movie(movieRequest.getName()+"1",movieRequest.getProductionYear());
-        movieRepository.save(movie1);
+        Movie movie = new Movie(movieRequest.getName(),movieRequest.getProductionYear(),movieRequest.getDirectorId());
+        movieRepository.save(movie);
         logService.saveLog();
 
         //throw new RuntimeException("강제 에러");

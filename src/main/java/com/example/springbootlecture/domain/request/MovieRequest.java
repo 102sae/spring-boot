@@ -10,6 +10,6 @@ import lombok.Setter;
 public class MovieRequest {
     private final String name;
     private final Integer productionYear;
-
+    private final Long directorId;
 
 }
